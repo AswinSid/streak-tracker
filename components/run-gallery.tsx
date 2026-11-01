@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/client";
 import { formatDay } from "@/lib/time";
 import { cn } from "@/components/ui";
 
+const TILTS = ["-rotate-2", "rotate-1", "rotate-2", "-rotate-1"];
+
 export type GalleryItem = { id: number; day: string; screenshot_path: string; username?: string; created_at?: string };
 
 export function RunGallery({
@@ -37,25 +39,29 @@ export function RunGallery({
 
   return (
     <>
-      <ul className="grid grid-cols-2 gap-2.5">
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-5 md:grid-cols-3 md:gap-x-5">
         {items.map((item, i) => (
-          <li key={item.id}>
+          <li key={item.id} className={TILTS[i % TILTS.length]}>
             <button
               type="button"
               onClick={() => setOpen(i)}
-              className="group relative block aspect-[3/4] w-full overflow-hidden rounded-2xl border border-line bg-surface text-left"
+              className="press block w-full rounded-[18px] border-2 border-black bg-ink p-1.5 pb-0 text-left text-black hard-ink"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={screenshotUrl(item.screenshot_path)}
-                alt={item.username ? `Run by @${item.username} on ${formatDay(item.day)}` : `Run on ${formatDay(item.day)}`}
-                loading="lazy"
-                decoding="async"
-                className="size-full object-cover transition group-active:scale-[0.98]"
-              />
-              <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/85 to-transparent px-3 pt-8 pb-2.5">
-                {item.username && <span className="block truncate text-sm font-semibold">@{item.username}</span>}
-                <span className="block text-xs text-cyan">{formatDay(item.day)}</span>
+              <span className="block aspect-3/4 overflow-hidden rounded-xl bg-surface">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={screenshotUrl(item.screenshot_path)}
+                  alt={item.username ? `Run by @${item.username} on ${formatDay(item.day)}` : `Run on ${formatDay(item.day)}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="size-full object-cover"
+                />
+              </span>
+              <span className="flex items-center justify-between gap-2 px-1.5 py-2">
+                <span className="min-w-0 truncate text-sm font-extrabold">
+                  {item.username ? `@${item.username}` : "run"}
+                </span>
+                <span className="shrink-0 font-mono text-[11px] font-bold opacity-60">{formatDay(item.day)}</span>
               </span>
             </button>
           </li>
@@ -67,10 +73,10 @@ export function RunGallery({
           type="button"
           onClick={loadMore}
           disabled={loading}
-          className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface text-[15px] font-medium active:bg-surface-2"
+          className="press mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-2 border-ink bg-surface-2 text-[15px] font-extrabold hard-sm-ink"
         >
           {loading && <LoaderCircle className="size-4 animate-spin" aria-hidden />}
-          Load more
+          load more receipts
         </button>
       )}
 
@@ -118,18 +124,19 @@ function Lightbox({
     };
   }, [hasPrev, hasNext, onPrev, onNext, onClose]);
 
-  const nav = "inline-flex size-12 items-center justify-center rounded-full border border-line bg-surface/90 disabled:opacity-0";
+  const nav =
+    "press inline-flex size-12 items-center justify-center rounded-full border-2 border-black bg-cyan text-black hard-sm-ink disabled:invisible";
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Run screenshot" className="animate-rise fixed inset-0 z-50 flex flex-col bg-black/95 backdrop-blur">
       <div className="flex items-center justify-between gap-3 px-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3">
         <div className="min-w-0">
           {item.username ? (
-            <Link href={`/u/${item.username}`} className="block truncate font-semibold" onClick={onClose}>
+            <Link href={`/u/${item.username}`} className="block truncate text-lg font-extrabold" onClick={onClose}>
               @{item.username}
             </Link>
           ) : null}
-          <p className="text-sm text-cyan">{formatDay(item.day)}</p>
+          <p className="font-mono text-sm font-bold text-cyan">{formatDay(item.day)}</p>
         </div>
         <button type="button" onClick={onClose} aria-label="Close" className={nav}>
           <X className="size-5" aria-hidden />
@@ -140,7 +147,7 @@ function Lightbox({
         <img
           src={screenshotUrl(item.screenshot_path)}
           alt=""
-          className="max-h-full max-w-full rounded-2xl object-contain"
+          className="max-h-full max-w-full rounded-2xl border-2 border-ink object-contain"
           onClick={(e) => e.stopPropagation()}
         />
       </div>

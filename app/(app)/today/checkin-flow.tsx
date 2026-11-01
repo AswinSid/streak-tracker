@@ -5,21 +5,30 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   Camera,
   Check,
   Cigarette,
   CircleCheck,
+  Clapperboard,
   Clock,
   Flame,
   Footprints,
+  Heart,
+  Hourglass,
   ImageUp,
   LoaderCircle,
   Lock,
+  Moon,
+  PartyPopper,
   RefreshCw,
   Shield,
+  Skull,
+  Sparkles,
   Trophy,
   TriangleAlert,
   Wine,
+  Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { refreshPublicData } from "@/app/actions";
@@ -36,13 +45,16 @@ import type {
   Rules,
 } from "@/lib/types";
 import { CountdownDigits, useServerCountdown } from "@/components/countdown";
+import { Backfill } from "./backfill";
 import {
   Card,
   IconBadge,
   Stat,
+  Sticker,
   buttonPrimary,
   buttonSecondary,
   cn,
+  tones,
   type Tone,
 } from "@/components/ui";
 
@@ -66,6 +78,10 @@ export function CheckinFlow({ userId, username, status, summary }: Props) {
   const router = useRouter();
   const refresh = useCallback(() => router.refresh(), [router]);
   const [result, setResult] = useState<CheckinResult | null>(null);
+  // Keep the backfill card mounted after it empties so its success note stays.
+  const [hadBackfill] = useState(
+    () => (summary?.backfill_days?.length ?? 0) > 0,
+  );
 
   const streak = summary?.current_streak ?? 0;
 
@@ -108,23 +124,33 @@ export function CheckinFlow({ userId, username, status, summary }: Props) {
 
   return (
     <div className="px-5">
-      <header className="flex items-center justify-between pt-[calc(env(safe-area-inset-top)+1.5rem)] pb-5">
-        <div>
-          <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">
+      <header className="flex items-end justify-between gap-3 pt-[calc(env(safe-area-inset-top)+1.75rem)] pb-6">
+        <div className="min-w-0">
+          <Sticker tone="violet" rotate={-3}>
             {formatDay(status.today)}
+          </Sticker>
+          <p className="mt-3 truncate text-[28px] leading-none font-extrabold tracking-tight">
+            hey @{username}
           </p>
-          <p className="mt-1 text-lg font-semibold">@{username}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
           <Pill icon={Flame} tone="amber" value={streak} label="day streak" />
           <Pill
-            icon={Trophy}
+            icon={Zap}
             tone="lime"
             value={summary?.points ?? 0}
             label="points"
           />
         </div>
       </header>
+      {summary && hadBackfill && (
+        <Backfill
+          days={summary.backfill_days}
+          joinedDay={summary.joined_day}
+          seasonStart={status.season_start}
+          rules={status.rules}
+        />
+      )}
       {body}
     </div>
   );
@@ -143,14 +169,14 @@ function Pill({
 }) {
   return (
     <div
-      className="flex h-10 items-center gap-1.5 rounded-full border border-line bg-surface px-3"
+      className={cn(
+        "flex h-8 items-center gap-1 rounded-full border-2 border-black px-2.5 hard-sm-ink",
+        tones[tone].solid,
+      )}
       aria-label={`${value} ${label}`}
     >
-      <Icon
-        className={cn("size-4", tone === "amber" ? "text-amber" : "text-lime")}
-        aria-hidden
-      />
-      <span className="tabular font-mono text-sm font-semibold">{value}</span>
+      <Icon className="size-4" strokeWidth={2.6} aria-hidden />
+      <span className="tabular font-mono text-sm font-bold">{value}</span>
     </div>
   );
 }
@@ -171,55 +197,72 @@ function LockedView({
   const upcoming = status.season_state === "upcoming";
 
   return (
-    <div className="animate-rise space-y-3">
-      <Card className="relative overflow-hidden text-center">
-        <div className="pointer-events-none absolute -top-24 left-1/2 size-56 -translate-x-1/2 rounded-full bg-amber/10 blur-3xl" />
-        <div className="relative">
-          <span className="mx-auto inline-flex">
-            <IconBadge icon={Lock} tone="amber" size="lg" />
-          </span>
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight">
-            {upcoming ? "The challenge starts soon" : "Check-in opens at 9 PM"}
-          </h1>
-          <p className="mx-auto mt-2 max-w-xs text-[15px] text-muted">
-            {upcoming
-              ? `First check-in on ${formatDay(status.season_start)} at 9:00 PM IST.`
-              : "Live your day first. Tonight you answer for all of it."}
-          </p>
-          <div className="mt-6">
-            <CountdownDigits ms={remaining} />
-          </div>
-          {target && (
-            <p className="mt-4 text-xs text-faint">
-              Opens {formatIstTime(target)} IST, closes 11:59 PM IST
-            </p>
-          )}
+    <div className="animate-rise space-y-4">
+      <Card
+        pop="amber"
+        className="dots relative overflow-hidden px-4 pt-8 pb-7 text-center"
+      >
+        <Moon
+          className="animate-float absolute top-4 left-5 size-9 fill-amber text-amber"
+          aria-hidden
+        />
+        <Sparkles
+          className="animate-float absolute top-6 right-6 size-6 text-pink [animation-delay:1.5s]"
+          aria-hidden
+        />
+        <Sticker tone="amber" rotate={-4} className="mt-6">
+          <Lock className="size-3" aria-hidden /> locked rn
+        </Sticker>
+        <h1 className="mt-4 text-[34px] leading-[0.95] font-extrabold tracking-tighter">
+          {upcoming ? "the season drops soon." : "not yet, bestie."}
+        </h1>
+        <p className="mx-auto mt-3 max-w-xs text-[15px] font-medium text-muted">
+          {upcoming
+            ? `First check-in is ${formatDay(status.season_start)} at 9:00 PM IST. Get ready.`
+            : "Go live your day. At 9 PM you spill all of it."}
+        </p>
+        <div className="mt-7">
+          <CountdownDigits ms={remaining} />
         </div>
+        {target && (
+          <p className="mt-5 text-xs font-semibold text-faint">
+            opens {formatIstTime(target)} IST · closes 11:59 PM IST
+          </p>
+        )}
       </Card>
 
       {streak > 0 && (
-        <Card className="flex items-center gap-4">
-          <IconBadge icon={Flame} tone="amber" />
+        <div className="flex items-center gap-4 rounded-[26px] border-2 border-black bg-orange p-4 text-black hard-ink">
+          <Flame
+            className="animate-wiggle size-10 shrink-0 fill-black/20"
+            strokeWidth={2.4}
+            aria-hidden
+          />
           <div>
-            <p className="font-semibold">
-              {streak} clean {streak === 1 ? "day" : "days"} in a row
+            <p className="text-lg leading-tight font-extrabold">
+              {streak} {streak === 1 ? "day" : "days"} clean. you&apos;re
+              cooking.
             </p>
-            <p className="text-sm text-muted">
+            <p className="text-sm font-semibold opacity-75">
               Check in tonight to keep it alive.
             </p>
           </div>
-        </Card>
+        </div>
       )}
 
       <Card>
-        <p className="mb-3 text-sm font-medium text-muted">
-          Tonight you will answer
+        <p className="mb-3 text-xs font-extrabold tracking-widest text-faint uppercase">
+          tonight&apos;s quiz
         </p>
-        <ul className="space-y-2.5">
-          {QUESTIONS.map((q) => (
-            <li key={q.key} className="flex items-center gap-3">
-              <IconBadge icon={q.icon} tone={q.tone} size="sm" />
-              <span className="text-[15px]">{q.title}</span>
+        <ul className="space-y-2">
+          {QUESTIONS.map((q, i) => (
+            <li
+              key={q.key}
+              className="flex items-center gap-3 rounded-2xl bg-surface-2 p-2.5"
+            >
+              <IconBadge icon={q.icon} tone={q.tone} size="sm" tilt={false} />
+              <span className="flex-1 text-[15px] font-bold">{q.title}</span>
+              <span className="font-mono text-xs text-faint">0{i + 1}</span>
             </li>
           ))}
         </ul>
@@ -235,6 +278,8 @@ const QUESTIONS: {
   icon: LucideIcon;
   tone: Tone;
   title: string;
+  yes: string;
+  no: string;
   good: boolean; // the answer that earns points
   points: (r: Rules) => number;
 }[] = [
@@ -242,7 +287,9 @@ const QUESTIONS: {
     key: "nutted",
     icon: Shield,
     tone: "lime",
-    title: "Did you nut today?",
+    title: "Iniku Adichiya? Be honest.",
+    yes: "yeah…",
+    no: "nope",
     good: false,
     points: (r) => r.no_nut,
   },
@@ -250,7 +297,9 @@ const QUESTIONS: {
     key: "drank",
     icon: Wine,
     tone: "violet",
-    title: "Did you drink alcohol today?",
+    title: "Iniku Kudichiya? Be honest.",
+    yes: "had a few",
+    no: "stayed dry",
     good: false,
     points: (r) => r.no_drink,
   },
@@ -258,7 +307,9 @@ const QUESTIONS: {
     key: "smoked",
     icon: Cigarette,
     tone: "pink",
-    title: "Did you smoke today?",
+    title: "Iniku Dum iluthiya? Be honest.",
+    yes: "yeah",
+    no: "nah, clean",
     good: false,
     points: (r) => r.no_smoke,
   },
@@ -266,7 +317,9 @@ const QUESTIONS: {
     key: "ran",
     icon: Footprints,
     tone: "cyan",
-    title: "Did you go for a run today?",
+    title: "Did you touch grass? (go for a run)",
+    yes: "ran it",
+    no: "not today",
     good: true,
     points: (r) => r.run,
   },
@@ -364,15 +417,15 @@ function Questions({
 
   if (closed) {
     return (
-      <Card className="text-center">
-        <span className="mx-auto inline-flex">
-          <IconBadge icon={Clock} tone="pink" size="lg" />
+      <Card pop="pink" className="animate-pop text-center">
+        <span className="inline-flex">
+          <IconBadge icon={Skull} tone="pink" size="lg" />
         </span>
-        <h1 className="mt-4 text-xl font-semibold">
-          Tonight&apos;s window just closed
+        <h1 className="mt-3 text-[30px] leading-none font-extrabold tracking-tighter">
+          window closed. oop.
         </h1>
-        <p className="mt-2 text-sm text-muted">
-          Check-ins close at 11:59 PM IST. See you at 9 PM.
+        <p className="mt-3 text-sm font-medium text-muted">
+          Check-ins close at 11:59 PM IST. Run it back at 9 PM.
         </p>
         <button
           type="button"
@@ -390,35 +443,36 @@ function Questions({
 
   return (
     <div>
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-5 flex items-center gap-3">
         <button
           type="button"
           onClick={back}
           disabled={history.length === 1}
           aria-label="Back"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface transition disabled:opacity-0"
+          className="press inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface hard-sm-ink disabled:invisible"
         >
-          <ArrowLeft className="size-5" aria-hidden />
+          <ArrowLeft className="size-5" strokeWidth={2.6} aria-hidden />
         </button>
-        <div className="flex flex-1 gap-1.5" aria-hidden>
+        <div
+          className="flex h-4 flex-1 gap-1 rounded-full border-2 border-ink p-0.5"
+          aria-hidden
+        >
           {[1, 2, 3, 4, 5].map((i) => (
             <span
               key={i}
               className={cn(
-                "h-1 flex-1 rounded-full transition-colors",
-                i <= progress ? "bg-lime" : "bg-line",
+                "flex-1 rounded-full transition-colors duration-300",
+                i <= progress ? "bg-lime" : "bg-transparent",
               )}
             />
           ))}
         </div>
         <span
-          className="flex items-center gap-1 text-xs text-faint"
+          className="flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-1 text-xs font-bold text-amber"
           aria-label="Time left tonight"
         >
           <Clock className="size-3.5" aria-hidden />
-          <span className="tabular font-mono">
-            <CountdownDigits ms={remaining} size="sm" />
-          </span>
+          <CountdownDigits ms={remaining} size="sm" />
         </span>
       </div>
 
@@ -426,6 +480,7 @@ function Questions({
         <QuestionCard
           key={step}
           q={QUESTIONS[qIndex]}
+          index={qIndex}
           rules={status.rules}
           streak={streak}
           value={answers[QUESTIONS[qIndex].key]}
@@ -459,7 +514,7 @@ function Questions({
       {error && (
         <p
           role="alert"
-          className="mt-4 flex items-start gap-2 rounded-2xl border border-pink/30 bg-pink/10 p-3.5 text-sm text-pink"
+          className="mt-4 flex items-start gap-2 rounded-2xl border-2 border-black bg-pink p-3.5 text-sm font-bold text-black hard-sm-ink"
         >
           <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />{" "}
           {error}
@@ -471,12 +526,14 @@ function Questions({
 
 function QuestionCard({
   q,
+  index,
   rules,
   streak,
   value,
   onAnswer,
 }: {
   q: (typeof QUESTIONS)[number];
+  index: number;
   rules: Rules;
   streak: number;
   value: boolean | undefined;
@@ -489,24 +546,48 @@ function QuestionCard({
       : 0;
   const stake =
     q.key === "nutted"
-      ? `No earns +${pts}${bonus ? ` and a +${bonus} streak bonus` : ""}. Yes resets your streak.`
+      ? `"nope" bags +${pts}${bonus ? ` plus a +${bonus} streak bonus` : ""}. "yeah" resets your streak to 0.`
       : q.key === "ran"
-        ? `Yes earns +${pts}. You will upload a screenshot next.`
-        : `No earns +${pts}.`;
+        ? `"ran it" bags +${pts}. You'll drop a screenshot next.`
+        : `"${q.no}" bags +${pts}.`;
 
   return (
     <div className="animate-rise">
-      <Card className="flex min-h-85 flex-col">
-        <IconBadge icon={q.icon} tone={q.tone} size="lg" />
-        <h1 className="mt-6 text-[30px] leading-tight font-semibold tracking-tight">
+      <Card
+        pop={q.tone}
+        className="relative flex min-h-80 flex-col overflow-hidden"
+      >
+        <q.icon
+          className={cn(
+            "pointer-events-none absolute -right-6 -bottom-8 size-44 -rotate-12 opacity-10",
+            tones[q.tone].text,
+          )}
+          strokeWidth={2}
+          aria-hidden
+        />
+        <div className="flex items-center justify-between">
+          <IconBadge icon={q.icon} tone={q.tone} size="lg" />
+          <span className="font-mono text-sm font-bold text-faint">
+            Q{index + 1}
+            <span className="opacity-50">/4</span>
+          </span>
+        </div>
+        <h1 className="relative mt-7 text-[36px] leading-[0.95] font-extrabold tracking-tighter">
           {q.title}
         </h1>
-        <p className="mt-3 text-[15px] text-muted">{stake}</p>
-        <p className="mt-auto pt-6 text-xs text-faint">
-          Be honest. It is your challenge.
+        <p
+          className={cn(
+            "relative mt-4 text-[15px] font-semibold",
+            tones[q.tone].text,
+          )}
+        >
+          {stake}
+        </p>
+        <p className="relative mt-auto pt-6 text-xs font-semibold text-faint">
+          lying only cheats you. just saying.
         </p>
       </Card>
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-3">
         {[true, false].map((v) => {
           const good = v === q.good;
           const selected = value === v;
@@ -516,15 +597,15 @@ function QuestionCard({
               type="button"
               onClick={() => onAnswer(v)}
               className={cn(
-                "h-18 rounded-2xl border text-lg font-semibold transition active:scale-[0.97]",
+                "press h-18 rounded-2xl border-2 text-lg font-extrabold",
                 selected
                   ? good
-                    ? "border-lime bg-lime text-black"
-                    : "border-pink bg-pink text-black"
-                  : "border-line bg-surface-2 text-ink",
+                    ? "border-black bg-lime text-black hard-ink"
+                    : "border-black bg-pink text-black hard-ink"
+                  : "border-ink bg-surface-2 text-ink hard-sm-ink",
               )}
             >
-              {v ? "Yes" : "No"}
+              {v ? q.yes : q.no}
             </button>
           );
         })}
@@ -569,13 +650,19 @@ function UploadStep({
 
   return (
     <div className="animate-rise">
-      <Card>
-        <IconBadge icon={Camera} tone="cyan" size="lg" />
-        <h1 className="mt-5 text-[26px] leading-tight font-semibold tracking-tight">
-          Show the run
+      <Card pop="cyan">
+        <div className="flex items-center gap-3">
+          <IconBadge icon={Camera} tone="cyan" size="lg" />
+          <Sticker tone="cyan" rotate={3}>
+            ≤{MAX_UPLOAD_BYTES / 1024}kb · auto-shrunk
+          </Sticker>
+        </div>
+        <h1 className="mt-5 text-[34px] leading-[0.95] font-extrabold tracking-tighter">
+          pics or it didn&apos;t happen.
         </h1>
-        <p className="mt-2 text-[15px] text-muted">
-          Screenshot from Strava, Adidas Running, Nike Run Club or any tracker.
+        <p className="mt-2 text-[15px] font-medium text-muted">
+          Screenshot from Strava, Adidas Running, Nike Run Club, whatever you
+          use.
         </p>
 
         <input
@@ -593,18 +680,18 @@ function UploadStep({
             <img
               src={shot.url}
               alt="Your run screenshot"
-              className="max-h-80 w-full rounded-2xl border border-line object-contain bg-black"
+              className="max-h-80 w-full rotate-1 rounded-2xl border-2 border-ink bg-black object-contain hard-sm-ink"
             />
-            <div className="mt-3 flex items-center justify-between text-sm">
-              <span className="flex items-center gap-1.5 text-lime">
-                <CircleCheck className="size-4" aria-hidden /> Compressed to{" "}
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <span className="flex items-center gap-1.5 font-bold text-lime">
+                <CircleCheck className="size-4" aria-hidden /> squished to{" "}
                 {Math.round(shot.size / 1024)} KB
               </span>
               <label
                 htmlFor="run-shot"
-                className="cursor-pointer font-medium text-muted underline-offset-4 active:text-ink"
+                className="cursor-pointer font-bold text-muted underline underline-offset-4 active:text-ink"
               >
-                Change
+                swap it
               </label>
             </div>
           </div>
@@ -612,37 +699,41 @@ function UploadStep({
           <label
             htmlFor="run-shot"
             className={cn(
-              "mt-5 flex h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-line bg-surface-2 transition active:border-cyan",
+              "mt-5 flex h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-cyan bg-cyan/8 transition active:bg-cyan/15",
               busy && "pointer-events-none",
             )}
           >
             {busy ? (
               <>
                 <LoaderCircle
-                  className="size-7 animate-spin text-cyan"
+                  className="size-8 animate-spin text-cyan"
                   aria-hidden
                 />
-                <span className="text-sm text-muted">
-                  Compressing on your phone
+                <span className="text-sm font-bold text-muted">
+                  squishing it on your phone…
                 </span>
               </>
             ) : (
               <>
-                <ImageUp className="size-7 text-cyan" aria-hidden />
-                <span className="text-[15px] font-medium">
-                  Choose screenshot
+                <ImageUp
+                  className="size-8 text-cyan"
+                  strokeWidth={2.4}
+                  aria-hidden
+                />
+                <span className="text-base font-extrabold">
+                  tap to drop your screenshot
                 </span>
-                <span className="text-xs text-faint">
-                  Shrunk to 100 KB or less before upload
+                <span className="text-xs font-semibold text-faint">
+                  shrunk to 100 KB or less before upload
                 </span>
               </>
             )}
           </label>
         )}
 
-        <p className="mt-4 flex items-start gap-2 text-xs text-faint">
+        <p className="mt-4 flex items-start gap-2 text-xs font-semibold text-faint">
           <Lock className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-          Run screenshots are public. Crop out maps that show your home.
+          Run pics are public. Crop out maps that show where you live, fr.
         </p>
       </Card>
 
@@ -650,9 +741,9 @@ function UploadStep({
         type="button"
         onClick={onNext}
         disabled={!shot || busy}
-        className={cn(buttonPrimary, "mt-3")}
+        className={cn(buttonPrimary, "mt-4")}
       >
-        Continue
+        next <ArrowRight className="size-5" strokeWidth={2.6} aria-hidden />
       </button>
     </div>
   );
@@ -690,28 +781,33 @@ function Review({
 
   return (
     <div className="animate-rise">
-      <Card>
-        <p className="text-sm text-muted">Tonight&apos;s points</p>
-        <p className="tabular mt-1 font-mono text-[56px] leading-none font-semibold text-lime">
+      <Card pop="lime" className="dots">
+        <div className="flex items-center justify-between">
+          <Sticker tone="lime" rotate={-3}>
+            tonight&apos;s haul
+          </Sticker>
+          <IconBadge icon={Zap} tone="lime" size="sm" />
+        </div>
+        <p className="tabular mt-4 text-[84px] leading-[0.85] font-extrabold tracking-tighter text-lime">
           +{total}
         </p>
-        <Breakdown b={b} className="mt-5" />
+        <Breakdown b={b} className="mt-6" />
         {shot && (
           <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface-2 p-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={shot.url}
               alt=""
-              className="size-12 rounded-xl object-cover"
+              className="size-12 rounded-xl border-2 border-ink object-cover"
             />
-            <span className="text-sm text-muted">
-              Run screenshot, {Math.round(shot.size / 1024)} KB
+            <span className="text-sm font-semibold text-muted">
+              run receipt, {Math.round(shot.size / 1024)} KB
             </span>
           </div>
         )}
       </Card>
-      <p className="mt-3 px-1 text-xs text-faint">
-        Once you submit, tonight is locked in. No edits.
+      <p className="mt-4 px-1 text-xs font-semibold text-faint">
+        Once you send it, tonight is locked. No edits, no take-backs.
       </p>
       <button
         type="button"
@@ -722,9 +818,9 @@ function Review({
         {submitting ? (
           <LoaderCircle className="size-5 animate-spin" aria-hidden />
         ) : (
-          <Check className="size-5" aria-hidden />
+          <Lock className="size-5" strokeWidth={2.8} aria-hidden />
         )}
-        {submitting ? "Submitting" : "Submit check-in"}
+        {submitting ? "sending…" : "lock it in"}
       </button>
     </div>
   );
@@ -738,25 +834,31 @@ function Breakdown({
   className?: string;
 }) {
   const rows: { label: string; value: number; icon: LucideIcon }[] = [
-    { label: "No nut", value: b.no_nut, icon: Shield },
-    { label: "Streak bonus", value: b.streak_bonus, icon: Flame },
-    { label: "Run", value: b.run, icon: Footprints },
-    { label: "No alcohol", value: b.no_drink, icon: Wine },
-    { label: "No smoking", value: b.no_smoke, icon: Cigarette },
+    { label: "no nut", value: b.no_nut, icon: Shield },
+    { label: "streak bonus", value: b.streak_bonus, icon: Flame },
+    { label: "run", value: b.run, icon: Footprints },
+    { label: "no alcohol", value: b.no_drink, icon: Wine },
+    { label: "no smoking", value: b.no_smoke, icon: Cigarette },
   ];
   return (
-    <ul className={cn("space-y-2.5", className)}>
+    <ul className={cn("space-y-1.5", className)}>
       {rows.map((r) => (
         <li
           key={r.label}
           className={cn(
-            "flex items-center gap-3 text-[15px]",
-            r.value === 0 && "text-faint",
+            "flex items-center gap-3 rounded-xl px-2 py-1.5 text-[15px] font-bold",
+            r.value === 0
+              ? "text-faint line-through decoration-2"
+              : "bg-surface-2",
           )}
         >
-          <r.icon className="size-4" aria-hidden />
+          <r.icon
+            className={cn("size-4", r.value === 0 && "opacity-40")}
+            strokeWidth={2.6}
+            aria-hidden
+          />
           <span className="flex-1">{r.label}</span>
-          <span className="tabular font-mono font-semibold">+{r.value}</span>
+          <span className="tabular font-mono">+{r.value}</span>
         </li>
       ))}
     </ul>
@@ -781,6 +883,13 @@ function entryToResult(e: DayEntry, rules: Rules): CheckinResult {
   };
 }
 
+const CONFETTI: { icon: LucideIcon; c: string }[] = [
+  { icon: Sparkles, c: "top-4 left-5 text-amber" },
+  { icon: PartyPopper, c: "top-10 right-6 text-pink [animation-delay:0.8s]" },
+  { icon: Zap, c: "bottom-8 left-8 text-cyan [animation-delay:1.6s]" },
+  { icon: Heart, c: "bottom-6 right-10 fill-lime text-lime [animation-delay:2.2s]" },
+];
+
 function DoneView({
   result,
   status,
@@ -800,30 +909,42 @@ function DoneView({
   const clean = result.breakdown.no_nut > 0;
 
   return (
-    <div className="space-y-3">
-      <Card className="animate-pop relative overflow-hidden text-center">
-        <div
-          className={cn(
-            "pointer-events-none absolute -top-24 left-1/2 size-60 -translate-x-1/2 rounded-full blur-3xl",
-            clean ? "bg-lime/15" : "bg-pink/15",
-          )}
-        />
-        <div className="relative">
-          <span className="mx-auto inline-flex">
-            <IconBadge
-              icon={clean ? CircleCheck : RefreshCw}
-              tone={clean ? "lime" : "pink"}
-              size="lg"
+    <div className="space-y-4">
+      <Card
+        pop={clean ? "lime" : "pink"}
+        className="animate-pop dots relative overflow-hidden px-5 py-9 text-center"
+      >
+        {clean &&
+          CONFETTI.map((c, i) => (
+            <c.icon
+              key={i}
+              className={cn("animate-float absolute size-6", c.c)}
+              strokeWidth={2.4}
+              aria-hidden
             />
-          </span>
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight">
-            {clean ? "Locked in. Well held." : "Logged. Tomorrow is a reset."}
-          </h1>
-          <p className="tabular mt-3 font-mono text-[56px] leading-none font-semibold text-lime">
-            +{result.points}
-          </p>
-          <p className="mt-1 text-sm text-muted">points tonight</p>
-        </div>
+          ))}
+        <Sticker tone={clean ? "lime" : "pink"} rotate={-4}>
+          {clean ? "W night" : "it happens"}
+        </Sticker>
+        <h1 className="mt-4 text-[38px] leading-[0.92] font-extrabold tracking-tighter">
+          {clean ? "locked in." : "reset arc."}
+        </h1>
+        <p className="mt-2 text-sm font-semibold text-muted">
+          {clean
+            ? "you held the line. absolute cinema."
+            : "tomorrow is a whole new episode."}
+        </p>
+        <p
+          className={cn(
+            "tabular mt-6 text-[96px] leading-[0.8] font-extrabold tracking-tighter",
+            clean ? "text-lime" : "text-pink",
+          )}
+        >
+          +{result.points}
+        </p>
+        <p className="mt-2 text-xs font-extrabold tracking-widest text-faint uppercase">
+          points tonight
+        </p>
       </Card>
 
       <div className="grid grid-cols-2 gap-3">
@@ -835,37 +956,42 @@ function DoneView({
         />
         <Stat
           icon={Trophy}
-          tone="lime"
+          tone="cyan"
           label={summary ? `of ${summary.total_users} players` : "Rank"}
           value={summary ? `#${summary.rank}` : "-"}
         />
       </div>
 
       <Card>
+        <p className="mb-3 text-xs font-extrabold tracking-widest text-faint uppercase">
+          the receipt
+        </p>
         <Breakdown b={result.breakdown} />
       </Card>
 
       <Card className="flex items-center gap-4">
-        <IconBadge icon={Clock} tone="muted" />
+        <IconBadge icon={Hourglass} tone="amber" size="sm" />
         <div className="flex-1">
           {status.next_opens_at ? (
             <>
-              <p className="text-sm text-muted">Next check-in opens in</p>
-              <p className="text-lg font-semibold">
+              <p className="text-xs font-extrabold tracking-widest text-faint uppercase">
+                next drop in
+              </p>
+              <p className="text-xl font-extrabold text-amber">
                 <CountdownDigits ms={remaining} size="sm" />
               </p>
             </>
           ) : (
-            <p className="text-sm text-muted">
-              That was the last night of the season.
+            <p className="text-sm font-bold text-muted">
+              That was the last night of the season. GG.
             </p>
           )}
         </div>
         <Link
           href="/leaderboard"
-          className="rounded-full border border-line px-4 py-2 text-sm font-medium active:bg-surface-2"
+          className="press inline-flex items-center gap-1 rounded-full border-2 border-black bg-amber px-4 py-2 text-sm font-extrabold text-black hard-sm-ink"
         >
-          Board
+          the board <ArrowRight className="size-4" strokeWidth={2.8} aria-hidden />
         </Link>
       </Card>
     </div>
@@ -874,16 +1000,16 @@ function DoneView({
 
 function SeasonEnded({ summary }: { summary: MySummary | null }) {
   return (
-    <div className="space-y-3">
-      <Card className="text-center">
-        <span className="mx-auto inline-flex">
-          <IconBadge icon={Trophy} tone="lime" size="lg" />
+    <div className="space-y-4">
+      <Card pop="violet" className="dots py-9 text-center">
+        <span className="animate-wiggle inline-flex">
+          <IconBadge icon={Clapperboard} tone="violet" size="lg" />
         </span>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">
-          The season is over
+        <h1 className="mt-4 text-[38px] leading-[0.92] font-extrabold tracking-tighter">
+          that&apos;s a wrap.
         </h1>
-        <p className="mt-2 text-[15px] text-muted">
-          Check-ins are closed. Here is how you finished.
+        <p className="mt-2 text-[15px] font-medium text-muted">
+          Check-ins are closed. Here&apos;s how you finished.
         </p>
       </Card>
       {summary && (
@@ -902,20 +1028,20 @@ function SeasonEnded({ summary }: { summary: MySummary | null }) {
           />
           <Stat
             icon={Shield}
-            tone="lime"
+            tone="violet"
             label="Clean days"
             value={summary.no_nut_days}
           />
           <Stat
             icon={Footprints}
-            tone="cyan"
+            tone="pink"
             label="Runs"
             value={summary.runs}
           />
         </div>
       )}
       <Link href="/leaderboard" className={buttonPrimary}>
-        See the final board
+        <Trophy className="size-5" strokeWidth={2.6} aria-hidden /> see the final board
       </Link>
     </div>
   );

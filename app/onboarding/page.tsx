@@ -9,7 +9,7 @@ export const metadata = { title: "Welcome" };
 
 export default function OnboardingPage() {
   return (
-    <main className="pt-safe mx-auto flex min-h-dvh max-w-md flex-col px-5 pb-8">
+    <main className="pt-safe mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5 pb-8 md:max-w-lg">
       <Suspense fallback={<Skeleton className="mt-16 h-80" />}>
         <Gate />
       </Suspense>

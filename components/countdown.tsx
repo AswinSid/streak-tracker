@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { pad, splitDuration } from "@/lib/time";
+import { cn } from "@/components/ui";
 
 // Counts down to `target` using the server's clock (serverNow), not the device clock.
 export function useServerCountdown(target: string | null, serverNow: string, onDone?: () => void) {
@@ -41,17 +42,22 @@ export function CountdownDigits({ ms, size = "lg" }: { ms: number; size?: "lg" |
       </span>
     );
   }
+  const colors = ["bg-amber", "bg-pink", "bg-cyan"];
+  const tilts = ["-rotate-3", "rotate-2", "-rotate-1"];
   return (
-    <div className="flex items-start justify-center gap-2" role="timer" aria-live="off">
+    <div className="flex items-start justify-center gap-3" role="timer" aria-live="off">
       {parts.map((p, i) => (
-        <div key={p.l} className="flex items-start gap-2">
-          <div className="text-center">
-            <div className="tabular rounded-2xl border border-line bg-surface-2 px-3 py-2 font-mono text-[40px] leading-none font-semibold">
-              {p.v}
-            </div>
-            <div className="mt-1.5 text-[11px] tracking-widest text-faint uppercase">{p.l}</div>
+        <div key={p.l} className="text-center">
+          <div
+            className={cn(
+              "tabular min-w-18 rounded-2xl border-2 border-black px-2 py-3 font-mono text-[40px] leading-none font-bold text-black hard-ink",
+              colors[i],
+              tilts[i],
+            )}
+          >
+            {p.v}
           </div>
-          {i < 2 && <span className="pt-3 font-mono text-3xl text-faint">:</span>}
+          <div className="mt-3 text-[11px] font-extrabold tracking-widest text-faint uppercase">{p.l}</div>
         </div>
       ))}
     </div>

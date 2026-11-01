@@ -81,6 +81,7 @@ export type Database = {
         }[];
       };
       is_username_available: { Args: { p_username: string }; Returns: boolean };
+      submit_backfill: { Args: { p_entries: Json }; Returns: Json };
       submit_checkin: {
         Args: {
           p_drank: boolean;

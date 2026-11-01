@@ -36,6 +36,7 @@ export type DayEntry = {
 export type MySummary = {
   username: string;
   joined_at: string;
+  joined_day: string;
   rank: number;
   total_users: number;
   points: number;
@@ -45,7 +46,11 @@ export type MySummary = {
   days_logged: number;
   today: DayEntry | null;
   history: DayEntry[];
+  /** Past days a late joiner can still fill in (oldest first). */
+  backfill_days: string[];
 };
+
+export type BackfillResult = { filled: number; points: number };
 
 export type CheckinResult = {
   day: string;

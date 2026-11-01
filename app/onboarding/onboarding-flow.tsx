@@ -8,17 +8,18 @@ import {
   Camera,
   Check,
   CircleX,
-  Clock,
   LoaderCircle,
   Lock,
-  Trophy,
+  Moon,
+  Rocket,
+  Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyError } from "@/lib/errors";
 import type { Rules } from "@/lib/types";
 import { RulesList } from "@/components/rules-list";
-import { Card, IconBadge, buttonPrimary, buttonSecondary, cn, type Tone } from "@/components/ui";
+import { Card, IconBadge, Sticker, buttonPrimary, buttonSecondary, cn, type Tone } from "@/components/ui";
 
 const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
 
@@ -105,18 +106,27 @@ function UsernameStep({
   const hint: Record<Availability, { text: string; className: string; icon?: LucideIcon }> = {
     idle: { text: "3 to 20 characters. Letters, numbers and underscores.", className: "text-faint" },
     invalid: { text: "Only letters, numbers and underscores. 3 to 20 characters.", className: "text-amber" },
-    checking: { text: "Checking availability", className: "text-muted", icon: LoaderCircle },
-    available: { text: `${trimmed} is yours if you want it`, className: "text-lime", icon: Check },
-    taken: { text: "Already taken. Try another one.", className: "text-pink", icon: CircleX },
+    checking: { text: "checking the vibes…", className: "text-muted", icon: LoaderCircle },
+    available: { text: `@${trimmed} is free. it's giving main character.`, className: "text-lime", icon: Check },
+    taken: { text: "someone already took it. try another", className: "text-pink", icon: CircleX },
   };
   const h = hint[availability];
 
   return (
     <form onSubmit={submit} className="animate-rise flex flex-1 flex-col pt-14">
-      <IconBadge icon={AtSign} tone="lime" size="lg" />
-      <h1 className="mt-6 text-[32px] leading-tight font-semibold tracking-tight">Pick your username</h1>
-      <p className="mt-2 text-[15px] text-muted">
-        This is how you show up on the public leaderboard. Keep it anonymous if you like.
+      <div className="flex items-center gap-3">
+        <IconBadge icon={AtSign} tone="lime" size="lg" />
+        <Sticker tone="pink" rotate={5}>
+          step 1 of 2
+        </Sticker>
+      </div>
+      <h1 className="mt-7 text-[48px] leading-[0.9] font-extrabold tracking-tighter">
+        what do we
+        <br />
+        call you?
+      </h1>
+      <p className="mt-4 text-[15px] font-medium text-muted">
+        This is your name on the public board. Go anon if you want, we won&apos;t judge.
       </p>
 
       <label htmlFor="username" className="sr-only">
@@ -124,11 +134,11 @@ function UsernameStep({
       </label>
       <div
         className={cn(
-          "mt-8 flex h-16 items-center gap-2 rounded-2xl border bg-surface px-4 transition focus-within:border-lime",
-          availability === "taken" ? "border-pink" : "border-line",
+          "mt-8 flex h-16 items-center gap-2 rounded-2xl border-2 bg-surface px-4 transition focus-within:border-lime",
+          availability === "taken" ? "border-pink hard-pink" : availability === "available" ? "border-lime hard-lime" : "border-ink hard-ink",
         )}
       >
-        <span className="text-lg text-faint">@</span>
+        <span className="text-xl font-extrabold text-lime">@</span>
         <input
           id="username"
           autoFocus
@@ -142,11 +152,11 @@ function UsernameStep({
           value={value}
           onChange={(e) => onChange(e.target.value.replace(/\s/g, ""))}
           placeholder="night_runner"
-          className="h-full min-w-0 flex-1 bg-transparent text-lg font-medium outline-none placeholder:text-faint"
+          className="h-full min-w-0 flex-1 bg-transparent text-xl font-extrabold outline-none placeholder:font-semibold placeholder:text-faint"
         />
-        <span className="tabular font-mono text-xs text-faint">{trimmed.length}/20</span>
+        <span className="tabular font-mono text-xs font-bold text-faint">{trimmed.length}/20</span>
       </div>
-      <p className={cn("mt-2.5 flex items-center gap-1.5 text-sm", h.className)} aria-live="polite">
+      <p className={cn("mt-3.5 flex items-center gap-1.5 text-sm font-bold", h.className)} aria-live="polite">
         {h.icon && (
           <h.icon className={cn("size-4", availability === "checking" && "animate-spin")} aria-hidden />
         )}
@@ -157,8 +167,8 @@ function UsernameStep({
       <div className="mt-auto pt-8">
         <button type="submit" disabled={availability !== "available" || saving} className={buttonPrimary}>
           {saving ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : null}
-          Continue
-          {!saving && <ArrowRight className="size-5" aria-hidden />}
+          claim it
+          {!saving && <ArrowRight className="size-5" strokeWidth={2.6} aria-hidden />}
         </button>
       </div>
     </form>
@@ -173,9 +183,9 @@ function HowItWorks({ username, rules }: { username: string; rules: Rules }) {
 
   const slides: { icon: LucideIcon; tone: Tone; title: string; body: React.ReactNode }[] = [
     {
-      icon: Clock,
+      icon: Moon,
       tone: "amber",
-      title: "Opens at 9 PM. Not a minute earlier.",
+      title: "it drops at 9pm. not a minute earlier.",
       body: (
         <ul className="space-y-3 text-[15px] leading-relaxed text-muted">
           <Bullet icon={Lock}>
@@ -189,15 +199,15 @@ function HowItWorks({ username, rules }: { username: string; rules: Rules }) {
       ),
     },
     {
-      icon: Trophy,
+      icon: Zap,
       tone: "lime",
-      title: "Every night earns points",
+      title: "every night = points. stack 'em.",
       body: <RulesList rules={rules} />,
     },
     {
       icon: Camera,
       tone: "cyan",
-      title: "Runs need proof",
+      title: "runs need receipts.",
       body: (
         <ul className="space-y-3 text-[15px] leading-relaxed text-muted">
           <Bullet icon={Camera}>
@@ -232,29 +242,36 @@ function HowItWorks({ username, rules }: { username: string; rules: Rules }) {
 
   return (
     <div className="flex flex-1 flex-col pt-10">
-      <p className="text-sm text-muted">
-        Welcome, <span className="font-semibold text-lime">@{username}</span>
+      <p className="text-lg font-extrabold">
+        welcome in, <span className="text-lime">@{username}</span>
       </p>
-      <div className="mt-4 flex gap-1.5" aria-hidden>
+      <div className="mt-4 flex h-4 gap-1 rounded-full border-2 border-ink p-0.5" aria-hidden>
         {slides.map((_, i) => (
           <span
             key={i}
-            className={cn("h-1 flex-1 rounded-full transition", i <= index ? "bg-lime" : "bg-line")}
+            className={cn("flex-1 rounded-full transition-colors duration-300", i <= index ? "bg-lime" : "bg-transparent")}
           />
         ))}
       </div>
 
       <div key={index} className="animate-rise mt-8 flex-1">
-        <IconBadge icon={slide.icon} tone={slide.tone} size="lg" />
-        <h1 className="mt-5 text-[28px] leading-tight font-semibold tracking-tight">{slide.title}</h1>
-        <Card className="mt-6">{slide.body}</Card>
+        <div className="flex items-center gap-3">
+          <IconBadge icon={slide.icon} tone={slide.tone} size="lg" />
+          <Sticker tone={slide.tone} rotate={4}>
+            {index + 1} / {slides.length}
+          </Sticker>
+        </div>
+        <h1 className="mt-6 text-[38px] leading-[0.92] font-extrabold tracking-tighter">{slide.title}</h1>
+        <Card pop={slide.tone} className="mt-6">
+          {slide.body}
+        </Card>
       </div>
 
-      {error && <p className="mt-4 text-sm text-pink">{error}</p>}
+      {error && <p className="mt-4 text-sm font-bold text-pink">{error}</p>}
       <div className="mt-8 flex gap-3">
         {index > 0 && (
           <button type="button" onClick={() => setIndex(index - 1)} className={cn(buttonSecondary, "w-auto px-5")}>
-            Back
+            back
           </button>
         )}
         <button
@@ -264,8 +281,13 @@ function HowItWorks({ username, rules }: { username: string; rules: Rules }) {
           className={buttonPrimary}
         >
           {finishing && <LoaderCircle className="size-5 animate-spin" aria-hidden />}
-          {last ? "Let's go" : "Next"}
-          {!finishing && <ArrowRight className="size-5" aria-hidden />}
+          {last ? "let's gooo" : "next"}
+          {!finishing &&
+            (last ? (
+              <Rocket className="size-5" strokeWidth={2.6} aria-hidden />
+            ) : (
+              <ArrowRight className="size-5" strokeWidth={2.6} aria-hidden />
+            ))}
         </button>
       </div>
     </div>
@@ -274,8 +296,8 @@ function HowItWorks({ username, rules }: { username: string; rules: Rules }) {
 
 function Bullet({ icon: Icon, children }: { icon: LucideIcon; children: React.ReactNode }) {
   return (
-    <li className="flex gap-3">
-      <Icon className="mt-1 size-4 shrink-0 text-faint" aria-hidden />
+    <li className="flex gap-3 rounded-2xl bg-surface-2 p-3 font-medium">
+      <Icon className="mt-0.5 size-4.5 shrink-0 text-ink" strokeWidth={2.6} aria-hidden />
       <span>{children}</span>
     </li>
   );

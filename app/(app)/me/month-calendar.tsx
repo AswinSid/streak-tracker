@@ -1,3 +1,4 @@
+import { Footprints, Skull } from "lucide-react";
 import { seasonDays } from "@/lib/time";
 import type { DayEntry } from "@/lib/types";
 import { cn } from "@/components/ui";
@@ -23,7 +24,7 @@ export function MonthCalendar({
 
   return (
     <div>
-      <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] text-faint">
+      <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-extrabold text-faint">
         {WEEKDAYS.map((d, i) => (
           <span key={i}>{d}</span>
         ))}
@@ -42,31 +43,35 @@ export function MonthCalendar({
               key={day}
               title={e ? `${day}: +${e.points}` : day}
               className={cn(
-                "relative flex aspect-square items-center justify-center rounded-xl text-xs font-medium tabular",
+                "tabular relative flex aspect-square items-center justify-center rounded-xl text-xs font-extrabold",
                 e
                   ? e.nutted
-                    ? "bg-pink/20 text-pink"
-                    : "bg-lime text-black"
+                    ? "border-2 border-black bg-pink text-black"
+                    : "border-2 border-black bg-lime text-black"
                   : future
-                    ? "bg-surface-2/50 text-faint"
+                    ? "border-2 border-dashed border-line text-faint"
                     : isToday
                       ? "bg-surface-2 text-ink"
                       : "bg-surface-2 text-faint line-through decoration-faint/60",
-                isToday && "ring-2 ring-lime/60 ring-offset-2 ring-offset-surface",
+                isToday && "ring-2 ring-amber ring-offset-2 ring-offset-surface",
               )}
             >
-              {n}
-              {e?.ran && <span className="absolute right-1 bottom-1 size-1.5 rounded-full bg-cyan" />}
+              {e?.nutted ? <Skull className="size-4" strokeWidth={2.6} aria-label="slipped" /> : n}
+              {e?.ran && (
+                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full border-2 border-black bg-cyan text-black">
+                  <Footprints className="size-2.5" strokeWidth={3} aria-label="ran" />
+                </span>
+              )}
             </span>
           );
         })}
       </div>
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted">
-        <Legend className="bg-lime" label="Clean" />
-        <Legend className="bg-pink/40" label="Nutted" />
-        <Legend className="bg-surface-2" label="Missed" />
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-bold text-muted">
+        <Legend className="bg-lime" label="clean" />
+        <Legend className="bg-pink" label="slipped" />
+        <Legend className="bg-surface-2" label="missed" />
         <span className="flex items-center gap-1.5">
-          <span className="size-1.5 rounded-full bg-cyan" /> Run
+          <span className="size-3 rounded-full border-2 border-black bg-cyan" /> ran
         </span>
       </div>
     </div>
@@ -76,7 +81,7 @@ export function MonthCalendar({
 function Legend({ className, label }: { className: string; label: string }) {
   return (
     <span className="flex items-center gap-1.5">
-      <span className={cn("size-3 rounded", className)} /> {label}
+      <span className={cn("size-3 rounded border border-black", className)} /> {label}
     </span>
   );
 }

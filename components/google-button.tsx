@@ -38,10 +38,10 @@ export function GoogleButton() {
         type="button"
         onClick={signIn}
         disabled={loading}
-        className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-white px-6 text-base font-semibold text-black transition active:scale-[0.98] disabled:opacity-60"
+        className="press inline-flex h-15 w-full items-center justify-center gap-3 rounded-2xl border-2 border-black bg-white px-6 text-[17px] font-extrabold text-black hard-lg-lime disabled:opacity-60"
       >
         {loading ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <GoogleMark />}
-        Continue with Google
+        I&apos;m in. Continue with Google
       </button>
       {error && <p className="mt-2 text-center text-sm text-pink">{error}</p>}
     </div>

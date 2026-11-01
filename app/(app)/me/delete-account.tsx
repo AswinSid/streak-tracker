@@ -35,9 +35,9 @@ export function DeleteAccount() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-medium text-pink active:bg-pink/10"
+        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-extrabold text-pink active:bg-pink/10"
       >
-        <Trash2 className="size-4" aria-hidden /> Delete account and data
+        <Trash2 className="size-4" aria-hidden /> delete my account + data
       </button>
 
       {open && (
@@ -45,22 +45,22 @@ export function DeleteAccount() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-title"
-          className="fixed inset-0 z-50 flex items-end bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end bg-black/70 backdrop-blur-sm md:items-center md:p-6"
           onClick={() => !busy && setOpen(false)}
         >
           <div
-            className="animate-rise pb-safe mx-auto w-full max-w-md rounded-t-3xl border-t border-line bg-surface px-5 pt-6"
+            className="animate-rise pb-safe mx-auto w-full max-w-md rounded-t-[28px] border-2 border-b-0 border-ink bg-surface px-5 pt-6 md:rounded-[28px] md:border-b-2 md:hard-lg-pink"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3">
-              <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-pink/15 text-pink">
-                <TriangleAlert className="size-5" aria-hidden />
+              <span className="inline-flex size-12 -rotate-6 items-center justify-center rounded-2xl border-2 border-black bg-pink text-black hard-sm-ink">
+                <TriangleAlert className="size-6" strokeWidth={2.6} aria-hidden />
               </span>
-              <h2 id="delete-title" className="text-lg font-semibold">
-                Delete everything?
+              <h2 id="delete-title" className="text-2xl font-extrabold tracking-tight">
+                nuke everything?
               </h2>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-muted">
+            <p className="mt-3 text-sm leading-relaxed font-medium text-muted">
               This permanently removes your account, username, every check-in and all your run
               screenshots. Your points leave the leaderboard. This cannot be undone.
             </p>
@@ -73,7 +73,7 @@ export function DeleteAccount() {
               onChange={(e) => setConfirmText(e.target.value)}
               autoCapitalize="characters"
               autoComplete="off"
-              className="mt-2 h-14 w-full rounded-2xl border border-line bg-surface-2 px-4 text-base outline-none focus:border-pink"
+              className="mt-2 h-14 w-full rounded-2xl border-2 border-line bg-surface-2 px-4 font-mono text-base font-bold outline-none focus:border-pink"
             />
             {error && <p className="mt-2 text-sm text-pink">{error}</p>}
             <div className="mt-5 grid grid-cols-2 gap-3 pb-5">
@@ -85,7 +85,7 @@ export function DeleteAccount() {
                 onClick={del}
                 disabled={confirmText !== "DELETE" || busy}
                 className={cn(
-                  "inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-pink font-semibold text-black transition active:scale-[0.98] disabled:opacity-40",
+                  "press inline-flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-black bg-pink font-extrabold text-black hard-ink disabled:opacity-40 disabled:shadow-none",
                 )}
               >
                 {busy && <LoaderCircle className="size-4 animate-spin" aria-hidden />}

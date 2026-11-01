@@ -9,6 +9,7 @@ const MESSAGES: Record<string, string> = {
   ALREADY_CHECKED_IN: "You already checked in today.",
   SCREENSHOT_REQUIRED: "Upload your run screenshot to continue.",
   SCREENSHOT_ALREADY_USED: "That screenshot was already used. Upload a new one.",
+  BACKFILL_NOT_ALLOWED: "One of those days can't be filled in anymore. Refresh and try again.",
   NOT_AN_IMAGE: "That file is not an image.",
   COMPRESSION_FAILED: "Could not shrink that image. Try a different screenshot.",
 };
