@@ -5,7 +5,7 @@ const MESSAGES: Record<string, string> = {
   NO_PROFILE: "Pick a username first.",
   MISSING_ANSWERS: "Answer every question first.",
   SEASON_NOT_ACTIVE: "Check-ins are only open from November 1 to 30.",
-  WINDOW_CLOSED: "Check-ins open at 9:00 PM IST and close at 11:59 PM IST.",
+  WINDOW_CLOSED: "Check-ins open at 9:30 PM IST and close at 11:59 PM IST.",
   ALREADY_CHECKED_IN: "You already checked in today.",
   SCREENSHOT_REQUIRED: "Upload your run screenshot to continue.",
   SCREENSHOT_ALREADY_USED: "That screenshot was already used. Upload a new one.",

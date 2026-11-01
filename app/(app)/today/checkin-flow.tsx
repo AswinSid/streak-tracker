@@ -181,7 +181,7 @@ function Pill({
   );
 }
 
-/* ---------------- locked (before 9 PM) ---------------- */
+/* ---------------- locked (before 9:30 PM) ---------------- */
 
 function LockedView({
   status,
@@ -218,8 +218,8 @@ function LockedView({
         </h1>
         <p className="mx-auto mt-3 max-w-xs text-[15px] font-medium text-muted">
           {upcoming
-            ? `First check-in is ${formatDay(status.season_start)} at 9:00 PM IST. Get ready.`
-            : "Go live your day. At 9 PM you spill all of it."}
+            ? `First check-in is ${formatDay(status.season_start)} at 9:30 PM IST. Get ready.`
+            : "Go live your day. At 9:30 PM you spill all of it."}
         </p>
         <div className="mt-7">
           <CountdownDigits ms={remaining} />
@@ -409,7 +409,7 @@ function Questions({
     } catch (e) {
       const msg = friendlyError(e);
       setError(msg);
-      if (msg.includes("already") || msg.includes("9:00 PM")) router.refresh();
+      if (msg.includes("already") || msg.includes("9:30 PM")) router.refresh();
     } finally {
       setSubmitting(false);
     }
@@ -425,7 +425,7 @@ function Questions({
           window closed. oop.
         </h1>
         <p className="mt-3 text-sm font-medium text-muted">
-          Check-ins close at 11:59 PM IST. Run it back at 9 PM.
+          Check-ins close at 11:59 PM IST. Run it back at 9:30 PM.
         </p>
         <button
           type="button"

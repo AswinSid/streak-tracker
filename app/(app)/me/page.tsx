@@ -71,7 +71,7 @@ async function Me() {
         <Card>
           <h2 className="text-xl font-extrabold tracking-tight">the rules, again</h2>
           <p className="mt-1 mb-4 text-sm font-medium text-muted">
-            Check-in opens every night at 9:00 PM IST and closes at 11:59 PM IST. No filling it in
+            Check-in opens every night at 9:30 PM IST and closes at 11:59 PM IST. No filling it in
             early. One entry a night, no edits.
           </p>
           <RulesList rules={status.rules} />

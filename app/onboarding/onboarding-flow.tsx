@@ -185,11 +185,11 @@ function HowItWorks({ username, rules }: { username: string; rules: Rules }) {
     {
       icon: Moon,
       tone: "amber",
-      title: "it drops at 9pm. not a minute earlier.",
+      title: "it drops at 9:30pm. not a minute earlier.",
       body: (
         <ul className="space-y-3 text-[15px] leading-relaxed text-muted">
           <Bullet icon={Lock}>
-            The check-in unlocks at <b className="text-ink">9:00 PM IST</b> and closes at{" "}
+            The check-in unlocks at <b className="text-ink">9:30 PM IST</b> and closes at{" "}
             <b className="text-ink">11:59 PM IST</b>. You cannot fill in today early, so your answers
             cover the whole day.
           </Bullet>

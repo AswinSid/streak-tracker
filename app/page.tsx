@@ -17,7 +17,7 @@ import { getRules } from "@/lib/public-data";
 const TILES = [
   {
     icon: Moon,
-    title: "9pm drop",
+    title: "9:30pm drop",
     body: "check-in unlocks every night. not a sec earlier.",
     bg: "bg-amber",
     tilt: "-rotate-2",
@@ -81,7 +81,7 @@ export default async function Landing() {
             </h1>
             <p className="mt-7 max-w-sm text-lg leading-snug font-medium text-muted">
               Vanakkam Tamil Yapping Nanbargale! One honest check-in every night
-              at 9. Hold the streak, go touch grass (run), skip the drinks +
+              at 9:30. Hold the streak, go touch grass (run), skip the drinks +
               smokes, and{" "}
               <span className="font-extrabold text-ink">
                 flex on the leaderboard.
@@ -143,7 +143,7 @@ export default async function Landing() {
                 <h2 className="font-extrabold">This is a FUN project!</h2>
                 <p className="mt-1 text-sm leading-relaxed text-muted">
                   Only your Google email, your username and your nightly answers
-                  are stored. That's it. This is a fun project! and the entire
+                  are stored. That&apos;s it. This is a fun project! and the entire
                   database will be Deleted at December 5
                 </p>
               </div>
