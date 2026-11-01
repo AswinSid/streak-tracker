@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NNN League
 
-## Getting Started
+A mobile-first, gamified No Nut November tracker. Users sign in with Google, pick a unique username,
+and check in once a night (9:00 PM to 11:59 PM IST, November 1 to 30). They answer four questions and
+earn points. Runs need a screenshot, which is compressed on the device to 100 KB or less. There is a
+public top-100 leaderboard and a public run gallery.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router, Cache Components, `proxy.ts`), Tailwind CSS 4, lucide-react
+- Supabase: Postgres (RLS + RPC functions), Auth (Google), Storage (`run-screenshots`), one Edge
+  Function (`delete-account`)
+
+## Points
+
+Points are defined in the `private.rules()` SQL function, and the UI reads them from there.
+
+| Item                         | Points                                     |
+| ---------------------------- | ------------------------------------------ |
+| Did not nut                  | +50                                        |
+| Ran (screenshot required)    | +30                                        |
+| No alcohol                   | +10                                        |
+| No smoking                   | +10                                        |
+| Streak bonus                 | +2 per prior clean day in a row, max +20   |
+
+## Where things live
+
+| Path                                    | What                                                          |
+| --------------------------------------- | ------------------------------------------------------------- |
+| `supabase/migrations/`                  | Full DB schema, RLS, storage bucket and RPC functions         |
+| `supabase/functions/delete-account/`    | Edge Function: deletes the caller's screenshots and account   |
+| `proxy.ts`, `lib/supabase/`             | Session refresh, route guards, Supabase clients               |
+| `lib/dal.ts`, `lib/public-data.ts`      | Server data access (session-bound and cached public reads)    |
+| `lib/compress-image.ts`                 | On-device screenshot compression                              |
+| `app/(app)/today/checkin-flow.tsx`      | Nightly check-in UI                                           |
+
+Season dates, opening time and points are SQL functions in the `private` schema
+(`season_start`, `season_end`, `opens_at_time`, `rules`).
+
+## Local development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+cp .env.example .env.local   # fill in the two values from Supabase > Project Settings > API
+bun install
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Regenerate DB types
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Use the Supabase MCP `generate_typescript_types` tool or `supabase gen types typescript`, then
+update `lib/database.types.ts`.
