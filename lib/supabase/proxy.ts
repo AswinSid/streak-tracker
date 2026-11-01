@@ -8,6 +8,14 @@ const PROTECTED = ["/today", "/me", "/onboarding"];
 // Refreshes the Supabase session cookie on every request and applies
 // optimistic route guards. Real authorization happens in the DB (RLS + RPC checks).
 export async function updateSession(request: NextRequest) {
+  // Supabase falls back to the Site URL (the bare origin) when a redirectTo is
+  // not on its allow list, so an OAuth code can arrive at "/". Finish it here.
+  if (request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("code")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_KEY, {
